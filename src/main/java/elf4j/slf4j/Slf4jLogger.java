@@ -44,7 +44,7 @@ import static elf4j.Level.*;
 class Slf4jLogger implements Logger {
     private static final Level DEFAULT_LEVEL = INFO;
     private static final String EMPTY_MESSAGE = "";
-    private static final EnumMap<Level, org.slf4j.event.Level> LEVEL_MAP = setLeveMap();
+    private static final EnumMap<Level, org.slf4j.event.Level> LEVEL_MAP = setLevelMap();
     private static final EnumMap<Level, Map<String, Slf4jLogger>> LOGGER_CACHE = initLoggerCache();
     private static final String THIS_FQCN = Slf4jLogger.class.getName();
     @NonNull private final String name;
@@ -84,7 +84,7 @@ class Slf4jLogger implements Logger {
         return loggerCache;
     }
 
-    private static EnumMap<Level, org.slf4j.event.Level> setLeveMap() {
+    private static EnumMap<Level, org.slf4j.event.Level> setLevelMap() {
         EnumMap<Level, org.slf4j.event.Level> levelMap = new EnumMap<>(Level.class);
         levelMap.put(TRACE, org.slf4j.event.Level.TRACE);
         levelMap.put(DEBUG, org.slf4j.event.Level.DEBUG);
