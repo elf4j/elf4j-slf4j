@@ -28,10 +28,10 @@ import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.slf4j.spi.DefaultLoggingEventBuilder;
 
-class CallerBoundaryCachingLoggingEventBuilder extends DefaultLoggingEventBuilder {
+class CallerBoundaryPermanentCachingLoggingEventBuilder extends DefaultLoggingEventBuilder {
     private boolean callerBoundaryCached;
 
-    public CallerBoundaryCachingLoggingEventBuilder(Logger logger, Level level) {
+    public CallerBoundaryPermanentCachingLoggingEventBuilder(Logger logger, Level level) {
         super(logger, level);
     }
 

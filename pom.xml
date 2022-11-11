@@ -30,7 +30,7 @@
 
     <groupId>io.github.elf4j</groupId>
     <artifactId>elf4j-slf4j</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <packaging>jar</packaging>
     <name>elf4j-slf4j</name>

@@ -210,11 +210,11 @@ class Slf4jLogger implements Logger {
     }
 
     private void slf4jLog(Throwable t, String message, Object... args) {
-        CallerBoundaryCachingLoggingEventBuilder callerBoundaryCachingLoggingEventBuilder =
-                new CallerBoundaryCachingLoggingEventBuilder(nativeLogger, LEVEL_MAP.get(this.level));
-        callerBoundaryCachingLoggingEventBuilder.setCallerBoundary(THIS_FQCN);
+        CallerBoundaryPermanentCachingLoggingEventBuilder callerBoundaryPermanentCachingLoggingEventBuilder =
+                new CallerBoundaryPermanentCachingLoggingEventBuilder(nativeLogger, LEVEL_MAP.get(this.level));
+        callerBoundaryPermanentCachingLoggingEventBuilder.setCallerBoundary(THIS_FQCN);
         LoggingEventBuilder loggingEventBuilder =
-                callerBoundaryCachingLoggingEventBuilder.setMessage(message).setCause(t);
+                callerBoundaryPermanentCachingLoggingEventBuilder.setMessage(message).setCause(t);
         if (args != null) {
             for (Object arg : args) {
                 loggingEventBuilder = loggingEventBuilder.addArgument(arg);
