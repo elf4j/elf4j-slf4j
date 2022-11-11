@@ -134,89 +134,70 @@ class Slf4jLogger implements Logger {
         if (this.level == OFF) {
             return false;
         }
-        return !isLevelDisabled();
+        return isLevelEnabled();
     }
 
     @Override
     public void log(Object message) {
-        if (isLevelDisabled()) {
-            return;
-        }
-        slf4jLog(null, Objects.toString(message), (Object[]) null);
+        slf4jLog(null, message, (Object[]) null);
     }
 
     @Override
     public void log(Supplier<?> message) {
-        if (isLevelDisabled()) {
-            return;
-        }
-        slf4jLog(null, Objects.toString(message.get()), (Object[]) null);
+        slf4jLog(null, message, (Object[]) null);
     }
 
     @Override
     public void log(String message, Object... args) {
-        if (isLevelDisabled()) {
-            return;
-        }
         slf4jLog(null, message, args);
     }
 
     @Override
     public void log(String message, Supplier<?>... args) {
-        if (isLevelDisabled()) {
-            return;
-        }
-        slf4jLog(null, message, Arrays.stream(args).map(Supplier::get).toArray(Object[]::new));
+        slf4jLog(null, message, (Object[]) args);
     }
 
     @Override
     public void log(Throwable t) {
-        if (isLevelDisabled()) {
-            return;
-        }
         slf4jLog(t, EMPTY_MESSAGE, (Object[]) null);
     }
 
     @Override
     public void log(Throwable t, Object message) {
-        if (isLevelDisabled()) {
-            return;
-        }
-        slf4jLog(t, Objects.toString(message), (Object[]) null);
+        slf4jLog(t, message, (Object[]) null);
     }
 
     @Override
     public void log(Throwable t, Supplier<?> message) {
-        if (isLevelDisabled()) {
-            return;
-        }
-        slf4jLog(t, message == null ? null : Objects.toString(message.get()), (Object[]) null);
+        slf4jLog(t, message, (Object[]) null);
     }
 
     @Override
     public void log(Throwable t, String message, Object... args) {
-        if (isLevelDisabled()) {
-            return;
-        }
         slf4jLog(t, message, args);
     }
 
     @Override
     public void log(Throwable t, String message, Supplier<?>... args) {
-        if (isLevelDisabled()) {
-            return;
-        }
-        slf4jLog(t, message, args == null ? null : Arrays.stream(args).map(Supplier::get).toArray(Object[]::new));
+        slf4jLog(t, message, (Object[]) args);
     }
 
-    private void slf4jLog(Throwable t, String message, Object... args) {
-        CallerBoundaryPermanentCachingLoggingEventBuilder callerBoundaryPermanentCachingLoggingEventBuilder =
-                new CallerBoundaryPermanentCachingLoggingEventBuilder(nativeLogger, LEVEL_MAP.get(this.level));
-        callerBoundaryPermanentCachingLoggingEventBuilder.setCallerBoundary(THIS_FQCN);
+    private void slf4jLog(Throwable t, Object message, Object... args) {
+        if (!isEnabled()) {
+            return;
+        }
+        CallerBoundaryImmutableLoggingEventBuilder callerBoundaryImmutableLoggingEventBuilder =
+                new CallerBoundaryImmutableLoggingEventBuilder(nativeLogger, LEVEL_MAP.get(this.level), THIS_FQCN);
+        if (message instanceof Supplier<?>) {
+            message = ((java.util.function.Supplier<?>) message).get();
+        }
         LoggingEventBuilder loggingEventBuilder =
-                callerBoundaryPermanentCachingLoggingEventBuilder.setMessage(message).setCause(t);
+                callerBoundaryImmutableLoggingEventBuilder.setMessage(Objects.toString(message)).setCause(t);
         if (args != null) {
             for (Object arg : args) {
+                if (arg instanceof Supplier<?>) {
+                    arg = ((java.util.function.Supplier<?>) arg).get();
+                }
                 loggingEventBuilder = loggingEventBuilder.addArgument(arg);
             }
         }
@@ -230,20 +211,20 @@ class Slf4jLogger implements Logger {
         return level == OFF ? NoopLogger.INSTANCE : getLogger(this.name, level);
     }
 
-    private boolean isLevelDisabled() {
+    private boolean isLevelEnabled() {
         switch (this.level) {
             case TRACE:
-                return !nativeLogger.isTraceEnabled();
+                return nativeLogger.isTraceEnabled();
             case DEBUG:
-                return !nativeLogger.isDebugEnabled();
+                return nativeLogger.isDebugEnabled();
             case INFO:
-                return !nativeLogger.isInfoEnabled();
+                return nativeLogger.isInfoEnabled();
             case WARN:
-                return !nativeLogger.isWarnEnabled();
+                return nativeLogger.isWarnEnabled();
             case ERROR:
-                return !nativeLogger.isErrorEnabled();
+                return nativeLogger.isErrorEnabled();
             default:
-                return true;
+                return false;
         }
     }
 

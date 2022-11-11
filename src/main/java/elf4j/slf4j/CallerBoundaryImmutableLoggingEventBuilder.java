@@ -28,19 +28,14 @@ import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.slf4j.spi.DefaultLoggingEventBuilder;
 
-class CallerBoundaryPermanentCachingLoggingEventBuilder extends DefaultLoggingEventBuilder {
-    private boolean callerBoundaryCached;
-
-    public CallerBoundaryPermanentCachingLoggingEventBuilder(Logger logger, Level level) {
+class CallerBoundaryImmutableLoggingEventBuilder extends DefaultLoggingEventBuilder {
+    public CallerBoundaryImmutableLoggingEventBuilder(Logger logger, Level level, String callerBoundaryFqcn) {
         super(logger, level);
+        super.setCallerBoundary(callerBoundaryFqcn);
     }
 
     @Override
     public void setCallerBoundary(String fqcn) {
-        if (callerBoundaryCached) {
-            return;
-        }
-        super.setCallerBoundary(fqcn);
-        callerBoundaryCached = true;
+        //noop
     }
 }
