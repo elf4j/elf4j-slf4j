@@ -50,11 +50,31 @@ class Slf4jLogger implements Logger {
     @NonNull private final String name;
     @NonNull private final Level level;
     @NonNull private final org.slf4j.Logger nativeLogger;
+    private final boolean enabled;
 
     private Slf4jLogger(@NonNull String name, @NonNull Level level) {
         this.name = name;
         this.level = level;
         this.nativeLogger = LoggerFactory.getLogger(name);
+        switch (this.level) {
+            case TRACE:
+                enabled = nativeLogger.isTraceEnabled();
+                break;
+            case DEBUG:
+                enabled = nativeLogger.isDebugEnabled();
+                break;
+            case INFO:
+                enabled = nativeLogger.isInfoEnabled();
+                break;
+            case WARN:
+                enabled = nativeLogger.isWarnEnabled();
+                break;
+            case ERROR:
+                enabled = nativeLogger.isErrorEnabled();
+                break;
+            default:
+                enabled = false;
+        }
     }
 
     static Slf4jLogger instance() {
@@ -131,10 +151,7 @@ class Slf4jLogger implements Logger {
 
     @Override
     public boolean isEnabled() {
-        if (this.level == OFF) {
-            return false;
-        }
-        return isLevelEnabled();
+        return this.enabled;
     }
 
     @Override
@@ -209,23 +226,6 @@ class Slf4jLogger implements Logger {
             return this;
         }
         return level == OFF ? NoopLogger.INSTANCE : getLogger(this.name, level);
-    }
-
-    private boolean isLevelEnabled() {
-        switch (this.level) {
-            case TRACE:
-                return nativeLogger.isTraceEnabled();
-            case DEBUG:
-                return nativeLogger.isDebugEnabled();
-            case INFO:
-                return nativeLogger.isInfoEnabled();
-            case WARN:
-                return nativeLogger.isWarnEnabled();
-            case ERROR:
-                return nativeLogger.isErrorEnabled();
-            default:
-                return false;
-        }
     }
 
     private static class CallStack {
