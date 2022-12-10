@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,7 +63,7 @@ class Slf4jLoggerTest {
 
         @Test
         void supplier() {
-            LOGGER.atTrace().log(() -> "supplier message");
+            LOGGER.atTrace().log((Supplier) () -> "supplier message");
         }
 
         @Test
@@ -74,9 +75,9 @@ class Slf4jLoggerTest {
         void messageAndSuppliers() {
             LOGGER.atWarn()
                     .log("message supplier arg1 {}, arg2 {}, arg3 {}",
-                            () -> "a11111",
-                            () -> "a22222",
-                            () -> Arrays.stream(new Object[] { "a33333" }).collect(Collectors.toList()));
+                            (Supplier) () -> "a11111",
+                            "a22222",
+                            (Supplier) () -> Arrays.stream(new Object[] { "a33333" }).collect(Collectors.toList()));
         }
 
         @Test
@@ -91,7 +92,7 @@ class Slf4jLoggerTest {
 
         @Test
         void throwableAndSupplier() {
-            LOGGER.atError().log(new Exception("ex message"), () -> "supplier log message");
+            LOGGER.atError().log(new Exception("ex message"), (Supplier) () -> "supplier log message");
         }
 
         @Test
@@ -104,9 +105,9 @@ class Slf4jLoggerTest {
             LOGGER.atError()
                     .log(new Exception("ex message"),
                             "log message with supplier arg1 {}, arg2 {}, arg3 {}",
-                            () -> "a11111",
-                            () -> "a22222",
-                            () -> Arrays.stream(new Object[] { "a33333" }).collect(Collectors.toList()));
+                            "a11111",
+                            "a22222",
+                            (Supplier) () -> Arrays.stream(new Object[] { "a33333" }).collect(Collectors.toList()));
         }
     }
 
@@ -149,7 +150,7 @@ class Slf4jLoggerTest {
                         "unless",
                         "enabled by the configuration of the logging provider");
             }
-            debug.log(() -> "alternative to the level guard, using a supplier function should achieve the same goal, pending quality of the logging provider");
+            debug.log((Supplier) () -> "alternative to the level guard, using a supplier function should achieve the same goal, pending quality of the logging provider");
         }
 
         @Test
@@ -176,10 +177,10 @@ class Slf4jLoggerTest {
                             "immutable");
             error.log(ex,
                     "now at Level.ERROR, together with the exception stack trace, logging some items expensive to compute: item1 {}, item2 {}, item3 {}, item4 {}, ...",
-                    () -> "i11111",
-                    () -> "i22222",
-                    () -> "i33333",
-                    () -> Arrays.stream(new Object[] { "i44444" }).collect(Collectors.toList()));
+                    "i11111",
+                    "i22222",
+                    "i33333",
+                    (Supplier) () -> Arrays.stream(new Object[] { "i44444" }).collect(Collectors.toList()));
         }
     }
 }

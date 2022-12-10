@@ -43,7 +43,6 @@ import static elf4j.Level.*;
 @ToString
 class Slf4jLogger implements Logger {
     private static final Level DEFAULT_LEVEL = INFO;
-    private static final String EMPTY_MESSAGE = "";
     private static final EnumMap<Level, org.slf4j.event.Level> LEVEL_MAP = setLevelMap();
     private static final EnumMap<Level, Map<String, Slf4jLogger>> LOGGER_CACHE = initLoggerCache();
     private static final String THIS_FQCN = Slf4jLogger.class.getName();
@@ -160,23 +159,13 @@ class Slf4jLogger implements Logger {
     }
 
     @Override
-    public void log(Supplier<?> message) {
-        slf4jLog(null, message, (Object[]) null);
-    }
-
-    @Override
     public void log(String message, Object... args) {
         slf4jLog(null, message, args);
     }
 
     @Override
-    public void log(String message, Supplier<?>... args) {
-        slf4jLog(null, message, (Object[]) args);
-    }
-
-    @Override
     public void log(Throwable t) {
-        slf4jLog(t, EMPTY_MESSAGE, (Object[]) null);
+        slf4jLog(t, t.getMessage(), (Object[]) null);
     }
 
     @Override
@@ -185,18 +174,8 @@ class Slf4jLogger implements Logger {
     }
 
     @Override
-    public void log(Throwable t, Supplier<?> message) {
-        slf4jLog(t, message, (Object[]) null);
-    }
-
-    @Override
     public void log(Throwable t, String message, Object... args) {
         slf4jLog(t, message, args);
-    }
-
-    @Override
-    public void log(Throwable t, String message, Supplier<?>... args) {
-        slf4jLog(t, message, (Object[]) args);
     }
 
     private void slf4jLog(Throwable t, Object message, Object... args) {
@@ -205,20 +184,20 @@ class Slf4jLogger implements Logger {
         }
         CallerBoundaryImmutableLoggingEventBuilder callerBoundaryImmutableLoggingEventBuilder =
                 new CallerBoundaryImmutableLoggingEventBuilder(nativeLogger, LEVEL_MAP.get(this.level), THIS_FQCN);
-        if (message instanceof Supplier<?>) {
-            message = ((java.util.function.Supplier<?>) message).get();
-        }
+        message = supply(message);
         LoggingEventBuilder loggingEventBuilder =
                 callerBoundaryImmutableLoggingEventBuilder.setMessage(Objects.toString(message)).setCause(t);
         if (args != null) {
             for (Object arg : args) {
-                if (arg instanceof Supplier<?>) {
-                    arg = ((java.util.function.Supplier<?>) arg).get();
-                }
+                arg = supply(arg);
                 loggingEventBuilder = loggingEventBuilder.addArgument(arg);
             }
         }
         loggingEventBuilder.log();
+    }
+
+    private static Object supply(Object o) {
+        return o instanceof Supplier<?> ? ((Supplier<?>) o).get() : o;
     }
 
     private Logger atLevel(Level level) {
