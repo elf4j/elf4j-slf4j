@@ -31,18 +31,20 @@ provider. Because of the ELF4J API, opting for SLF4J as the logging implementati
 
 The usual [SLF4J configuration](https://www.slf4j.org/manual.html#swapping) applies.
 
-With Maven, in addition to the ELF4J API compile-scope dependency, an end-user application would use this provider as a runtime-scope dependency:
+With Maven, in addition to the ELF4J API compile-scope dependency, an end-user application would use this provider as a
+runtime-scope dependency:
 
-```xml
+```html
+
 <dependency>
-  <groupId>io.github.elf4j</groupId>
-  <artifactId>elf4j-api</artifactId>
+    <groupId>io.github.elf4j</groupId>
+    <artifactId>elf4j-api</artifactId>
 </dependency>
 
 <dependency>
-  <groupId>io.github.elf4j</groupId>
-  <artifactId>elf4j-slf4j</artifactId>
-  <scope>runtime</scope>
+    <groupId>io.github.elf4j</groupId>
+    <artifactId>elf4j-slf4j</artifactId>
+    <scope>runtime</scope>
 </dependency>
 ```
 
