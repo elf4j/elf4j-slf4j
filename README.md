@@ -16,7 +16,6 @@ change.
 ## Prerequisite
 
 - Java 8+
-- [ELF4J](https://github.com/elf4j/elf4j-api) 7.0.0+
 - SLF4J 2.0.3+
 
 ## Get it...
