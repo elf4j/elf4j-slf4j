@@ -3,7 +3,7 @@
 # elf4j-slf4j
 
 The [SLF4J](https://www.slf4j.org/) service provider binding for the Easy Logging Facade for
-Java ([ELF4J](https://github.com/elf4j/elf4j-api)) SPI
+Java ([ELF4J](https://github.com/elf4j/elf4j)) SPI
 
 ## User story
 
@@ -24,10 +24,10 @@ change.
 
 ## Use it...
 
-If you are using the [ELF4J API](https://github.com/elf4j/elf4j-api#the-client-api) for logging, and wish to select or
-change to use SLF4J as the run-time implementation, then simply pack this binding JAR in the classpath when the
-application deploys. No code change needed. At compile time, the client code is unaware of this run-time logging service
-provider. Because of the ELF4J API, opting for SLF4J as the logging implementation is a deployment-time decision.
+If you are using the [ELF4J API](https://github.com/elf4j/elf4j/) for logging, and wish to select or change to use SLF4J
+as the run-time implementation, then simply pack this binding JAR in the classpath when the application deploys. No code
+change needed. At compile time, the client code is unaware of this run-time logging service provider. Because of the
+ELF4J API, opting for SLF4J as the logging implementation is a deployment-time decision.
 
 The usual [SLF4J configuration](https://www.slf4j.org/manual.html#swapping) applies.
 
@@ -38,7 +38,7 @@ runtime-scope dependency:
 
 <dependency>
     <groupId>io.github.elf4j</groupId>
-    <artifactId>elf4j-api</artifactId>
+    <artifactId>elf4j</artifactId>
 </dependency>
 
 <dependency>
@@ -48,6 +48,6 @@ runtime-scope dependency:
 </dependency>
 ```
 
-Note: Only one logging provider such as this should be in effect at run-time. If different providers end up in the final 
-build of an application, somehow, then the `elf4j.logger.factory.fqcn` system property will have to be used to select the 
-desired provider.
+Note: Only one logging provider such as this should be in effect at run-time. If different providers end up in the final
+build of an application, somehow, then the `elf4j.logger.factory.fqcn` system property will have to be used to select
+the desired provider.

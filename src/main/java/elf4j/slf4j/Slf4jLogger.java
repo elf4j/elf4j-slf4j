@@ -182,15 +182,12 @@ class Slf4jLogger implements Logger {
         if (!isEnabled()) {
             return;
         }
-        CallerBoundaryImmutableLoggingEventBuilder callerBoundaryImmutableLoggingEventBuilder =
-                new CallerBoundaryImmutableLoggingEventBuilder(nativeLogger, LEVEL_MAP.get(this.level), THIS_FQCN);
-        message = supply(message);
-        LoggingEventBuilder loggingEventBuilder =
-                callerBoundaryImmutableLoggingEventBuilder.setMessage(Objects.toString(message)).setCause(t);
+        LoggingEventBuilder loggingEventBuilder = new CallerBoundaryImmutableLoggingEventBuilder(nativeLogger,
+                LEVEL_MAP.get(this.level),
+                THIS_FQCN).setMessage(Objects.toString(supply(message))).setCause(t);
         if (args != null) {
             for (Object arg : args) {
-                arg = supply(arg);
-                loggingEventBuilder = loggingEventBuilder.addArgument(arg);
+                loggingEventBuilder = loggingEventBuilder.addArgument(supply(arg));
             }
         }
         loggingEventBuilder.log();
@@ -212,14 +209,15 @@ class Slf4jLogger implements Logger {
         static StackTraceElement mostRecentCallerOf(@NonNull Class<?> calleeClass) {
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
             String calleeClassName = calleeClass.getName();
-            for (int i = 0; i < stackTrace.length; i++) {
+            int i = 0;
+            for (; i < stackTrace.length; i++) {
                 if (calleeClassName.equals(stackTrace[i].getClassName())) {
-                    for (int j = i + 1; j < stackTrace.length; j++) {
-                        if (!calleeClassName.equals(stackTrace[j].getClassName())) {
-                            return stackTrace[j];
-                        }
-                    }
                     break;
+                }
+            }
+            for (i++; i < stackTrace.length; i++) {
+                if (!calleeClassName.equals(stackTrace[i].getClassName())) {
+                    return stackTrace[i];
                 }
             }
             throw new NoSuchElementException("unable to locate caller class of " + calleeClass + " in call stack "
