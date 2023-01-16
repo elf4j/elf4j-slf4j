@@ -25,8 +25,8 @@ application using the ELF4J API for logging can opt to use SLF4J at deployment t
 
 If you are using the [ELF4J API](https://github.com/elf4j/elf4j/) for logging, and wish to select or change to use SLF4J
 as the run-time implementation, then simply pack this binding JAR in the classpath when the application deploys. No code
-change needed. At compile time, the client code is unaware of this run-time logging service provider. Because of the
-ELF4J API, opting for SLF4J as the logging implementation is a deployment-time decision.
+change needed. At compile time, the client code is unaware of this run-time logging service provider. With the ELF4J
+facade, opting for SLF4J as the logging implementation is a deployment-time decision.
 
 The usual [SLF4J configuration](https://www.slf4j.org/manual.html#swapping) applies.
 
