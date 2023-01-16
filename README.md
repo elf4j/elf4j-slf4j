@@ -7,11 +7,10 @@ Java ([ELF4J](https://github.com/elf4j/elf4j)) SPI
 
 ## User story
 
-As a service provider of the Easy Logging Facade for Java (ELF4J) SPI, I want to bind the logging capabilities of SLF4J
-to the ELF4J client application via
-the [Java Service Provider Interfaces (SPI)](https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html) mechanism, so
-that any application using the ELF4J API for logging can opt to use the SLF4J framework at deployment time without code
-change.
+As a service provider of the [ELF4J](https://github.com/elf4j/elf4j) SPI, I want to bind the logging capabilities of
+SLF4J to the ELF4J client application via the
+Java [Service Provider Framework](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html), so that any
+application using the ELF4J API for logging can opt to use SLF4J at deployment time without code change.
 
 ## Prerequisite
 
@@ -31,14 +30,15 @@ ELF4J API, opting for SLF4J as the logging implementation is a deployment-time d
 
 The usual [SLF4J configuration](https://www.slf4j.org/manual.html#swapping) applies.
 
-With Maven, in addition to the ELF4J API compile-scope dependency, an end-user application would use this provider as a
-runtime-scope dependency:
+With Maven, in addition to use compile-scope on the [ELF4J API](https://github.com/elf4j/elf4j) dependency, an end-user
+application would use runtime-scope for this provider as a dependency:
 
 ```html
 
 <dependency>
     <groupId>io.github.elf4j</groupId>
     <artifactId>elf4j</artifactId>
+    <scope>compile</scope>
 </dependency>
 
 <dependency>
