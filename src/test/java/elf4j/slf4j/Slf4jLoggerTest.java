@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 class Slf4jLoggerTest {
-    public static final Logger LOGGER = Logger.instance(Slf4jLoggerTest.class);
+    public static final Logger LOGGER = Logger.instance();
 
     @Nested
     class levels {
@@ -116,23 +116,13 @@ class Slf4jLoggerTest {
         @Test
         void loggerNameForNullOrNoargInstanceCaller() {
             String thisClassName = this.getClass().getName();
-            assertEquals(thisClassName, Logger.instance().getName());
-            assertEquals(thisClassName, Logger.instance((Class<?>) null).getName());
-            assertEquals(thisClassName, Logger.instance((String) null).getName());
-        }
-
-        @Test
-        void blankOrEmptyNamesStayAsIs() {
-            String blank = "   ";
-            assertEquals(blank, Logger.instance(blank).getName());
-            String empty = "";
-            assertEquals("", Logger.instance(empty).getName());
+            assertEquals(thisClassName, ((Slf4jLogger) Logger.instance()).getName());
         }
     }
 
     @Nested
     class readmeSamples {
-        private final Logger logger = Logger.instance(readmeSamples.class);
+        private final Slf4jLogger logger = (Slf4jLogger) Logger.instance();
 
         @Test
         void messagesArgsAndGuards() {
@@ -140,7 +130,7 @@ class Slf4jLoggerTest {
             logger.atInfo().log("info message");
             Logger debug = logger.atDebug();
             assertNotSame(logger, debug);
-            assertEquals(logger.getName(), debug.getName());
+            assertEquals(logger.getName(), ((Slf4jLogger) debug).getName());
             assertEquals(Level.DEBUG, debug.getLevel());
             if (debug.isEnabled()) {
                 debug.log("a {} guarded by a {}, so {} is created {} DEBUG level is {}",

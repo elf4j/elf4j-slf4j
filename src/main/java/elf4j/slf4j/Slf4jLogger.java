@@ -48,28 +48,28 @@ class Slf4jLogger implements Logger {
     private static final String THIS_FQCN = Slf4jLogger.class.getName();
     @NonNull private final String name;
     @NonNull private final Level level;
-    @NonNull private final org.slf4j.Logger nativeLogger;
+    @NonNull private final org.slf4j.Logger delegateLogger;
     private final boolean enabled;
 
     private Slf4jLogger(@NonNull String name, @NonNull Level level) {
         this.name = name;
         this.level = level;
-        this.nativeLogger = LoggerFactory.getLogger(name);
+        this.delegateLogger = LoggerFactory.getLogger(name);
         switch (this.level) {
             case TRACE:
-                enabled = nativeLogger.isTraceEnabled();
+                enabled = delegateLogger.isTraceEnabled();
                 break;
             case DEBUG:
-                enabled = nativeLogger.isDebugEnabled();
+                enabled = delegateLogger.isDebugEnabled();
                 break;
             case INFO:
-                enabled = nativeLogger.isInfoEnabled();
+                enabled = delegateLogger.isInfoEnabled();
                 break;
             case WARN:
-                enabled = nativeLogger.isWarnEnabled();
+                enabled = delegateLogger.isWarnEnabled();
                 break;
             case ERROR:
-                enabled = nativeLogger.isErrorEnabled();
+                enabled = delegateLogger.isErrorEnabled();
                 break;
             default:
                 enabled = false;
@@ -78,14 +78,6 @@ class Slf4jLogger implements Logger {
 
     static Slf4jLogger instance() {
         return getLogger(CallStack.mostRecentCallerOf(Logger.class).getClassName());
-    }
-
-    static Slf4jLogger instance(String name) {
-        return getLogger(name == null ? CallStack.mostRecentCallerOf(Logger.class).getClassName() : name);
-    }
-
-    static Slf4jLogger instance(Class<?> clazz) {
-        return getLogger(clazz == null ? CallStack.mostRecentCallerOf(Logger.class).getClassName() : clazz.getName());
     }
 
     private static Slf4jLogger getLogger(@NonNull String name, @NonNull Level level) {
@@ -113,34 +105,16 @@ class Slf4jLogger implements Logger {
         return levelMap;
     }
 
-    @Override
-    public Logger atTrace() {
-        return atLevel(TRACE);
+    private static Object supply(Object o) {
+        return o instanceof Supplier<?> ? ((Supplier<?>) o).get() : o;
     }
 
     @Override
-    public Logger atDebug() {
-        return atLevel(DEBUG);
-    }
-
-    @Override
-    public Logger atInfo() {
-        return atLevel(INFO);
-    }
-
-    @Override
-    public Logger atWarn() {
-        return atLevel(WARN);
-    }
-
-    @Override
-    public Logger atError() {
-        return atLevel(ERROR);
-    }
-
-    @Override
-    public @NonNull String getName() {
-        return this.name;
+    public Logger atLevel(Level level) {
+        if (this.level == level) {
+            return this;
+        }
+        return level == OFF ? NoopLogger.OFF : getLogger(this.name, level);
     }
 
     @Override
@@ -178,11 +152,15 @@ class Slf4jLogger implements Logger {
         slf4jLog(t, message, args);
     }
 
+    String getName() {
+        return this.name;
+    }
+
     private void slf4jLog(Throwable t, Object message, Object... args) {
         if (!isEnabled()) {
             return;
         }
-        LoggingEventBuilder loggingEventBuilder = new CallerBoundaryImmutableLoggingEventBuilder(nativeLogger,
+        LoggingEventBuilder loggingEventBuilder = new CallerBoundaryImmutableLoggingEventBuilder(delegateLogger,
                 LEVEL_MAP.get(this.level),
                 THIS_FQCN).setMessage(Objects.toString(supply(message))).setCause(t);
         if (args != null) {
@@ -191,17 +169,6 @@ class Slf4jLogger implements Logger {
             }
         }
         loggingEventBuilder.log();
-    }
-
-    private static Object supply(Object o) {
-        return o instanceof Supplier<?> ? ((Supplier<?>) o).get() : o;
-    }
-
-    private Logger atLevel(Level level) {
-        if (this.level == level) {
-            return this;
-        }
-        return level == OFF ? NoopLogger.INSTANCE : getLogger(this.name, level);
     }
 
     private static class CallStack {
