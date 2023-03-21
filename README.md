@@ -1,6 +1,6 @@
 # elf4j-slf4j
 
-An adapter to use [SLF4J](https://www.slf4j.org/) as service provider and logging engine for
+An adapter to use [SLF4J](https://www.slf4j.org/) as service provider and runtime log engine for
 the [ELF4J](https://github.com/elf4j/elf4j) (Easy Logging Facade for Java) API
 
 ## User story
