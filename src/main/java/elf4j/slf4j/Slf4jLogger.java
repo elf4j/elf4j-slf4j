@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Easy Logging Facade for Java (ELF4J)
+ * Copyright (c) 2022 Qingtian Wang
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
 package elf4j.slf4j;
@@ -43,41 +44,22 @@ import static elf4j.Level.*;
 @ToString
 class Slf4jLogger implements Logger {
     private static final Level DEFAULT_LEVEL = INFO;
+    private static final Class<Logger> SERVICE_ACCESS_CLASS = Logger.class;
+    private static final String CALLER_BOUNDARY_FQCN = Slf4jLogger.class.getName();
     private static final EnumMap<Level, org.slf4j.event.Level> LEVEL_MAP = setLevelMap();
     private static final EnumMap<Level, Map<String, Slf4jLogger>> LOGGER_CACHE = initLoggerCache();
-    private static final String THIS_FQCN = Slf4jLogger.class.getName();
     @NonNull private final String name;
     @NonNull private final Level level;
     @NonNull private final org.slf4j.Logger delegateLogger;
-    private final boolean enabled;
 
     private Slf4jLogger(@NonNull String name, @NonNull Level level) {
         this.name = name;
         this.level = level;
         this.delegateLogger = LoggerFactory.getLogger(name);
-        switch (this.level) {
-            case TRACE:
-                enabled = delegateLogger.isTraceEnabled();
-                break;
-            case DEBUG:
-                enabled = delegateLogger.isDebugEnabled();
-                break;
-            case INFO:
-                enabled = delegateLogger.isInfoEnabled();
-                break;
-            case WARN:
-                enabled = delegateLogger.isWarnEnabled();
-                break;
-            case ERROR:
-                enabled = delegateLogger.isErrorEnabled();
-                break;
-            default:
-                enabled = false;
-        }
     }
 
     static Slf4jLogger instance() {
-        return getLogger(CallStack.mostRecentCallerOf(Logger.class).getClassName());
+        return getLogger(serviceClient().getClassName());
     }
 
     private static Slf4jLogger getLogger(@NonNull String name, @NonNull Level level) {
@@ -95,6 +77,24 @@ class Slf4jLogger implements Logger {
         return loggerCache;
     }
 
+    private static StackTraceElement serviceClient() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        String calleeClassName = SERVICE_ACCESS_CLASS.getName();
+        int i = 0;
+        for (; i < stackTrace.length; i++) {
+            if (calleeClassName.equals(stackTrace[i].getClassName())) {
+                break;
+            }
+        }
+        for (i++; i < stackTrace.length; i++) {
+            if (!calleeClassName.equals(stackTrace[i].getClassName())) {
+                return stackTrace[i];
+            }
+        }
+        throw new NoSuchElementException("unable to locate caller class of " + calleeClassName + " in call stack "
+                + Arrays.toString(stackTrace));
+    }
+
     private static EnumMap<Level, org.slf4j.event.Level> setLevelMap() {
         EnumMap<Level, org.slf4j.event.Level> levelMap = new EnumMap<>(Level.class);
         levelMap.put(TRACE, org.slf4j.event.Level.TRACE);
@@ -107,6 +107,10 @@ class Slf4jLogger implements Logger {
 
     private static Object supply(Object o) {
         return o instanceof Supplier<?> ? ((Supplier<?>) o).get() : o;
+    }
+
+    private static org.slf4j.event.Level translate(Level level) {
+        return LEVEL_MAP.get(level);
     }
 
     @Override
@@ -124,7 +128,20 @@ class Slf4jLogger implements Logger {
 
     @Override
     public boolean isEnabled() {
-        return this.enabled;
+        switch (this.level) {
+            case TRACE:
+                return delegateLogger.isTraceEnabled();
+            case DEBUG:
+                return delegateLogger.isDebugEnabled();
+            case INFO:
+                return delegateLogger.isInfoEnabled();
+            case WARN:
+                return delegateLogger.isWarnEnabled();
+            case ERROR:
+                return delegateLogger.isErrorEnabled();
+            default:
+                return false;
+        }
     }
 
     @Override
@@ -152,7 +169,7 @@ class Slf4jLogger implements Logger {
         slf4jLog(t, message, args);
     }
 
-    String getName() {
+    @NonNull String getName() {
         return this.name;
     }
 
@@ -161,35 +178,14 @@ class Slf4jLogger implements Logger {
             return;
         }
         LoggingEventBuilder loggingEventBuilder = new CallerBoundaryImmutableLoggingEventBuilder(delegateLogger,
-                LEVEL_MAP.get(this.level),
-                THIS_FQCN).setMessage(Objects.toString(supply(message))).setCause(t);
+                translate(this.level),
+                CALLER_BOUNDARY_FQCN).setMessage(Objects.toString(supply(message))).setCause(t);
         if (args != null) {
             for (Object arg : args) {
                 loggingEventBuilder = loggingEventBuilder.addArgument(supply(arg));
             }
         }
         loggingEventBuilder.log();
-    }
-
-    private static class CallStack {
-
-        static StackTraceElement mostRecentCallerOf(@NonNull Class<?> calleeClass) {
-            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-            String calleeClassName = calleeClass.getName();
-            int i = 0;
-            for (; i < stackTrace.length; i++) {
-                if (calleeClassName.equals(stackTrace[i].getClassName())) {
-                    break;
-                }
-            }
-            for (i++; i < stackTrace.length; i++) {
-                if (!calleeClassName.equals(stackTrace[i].getClassName())) {
-                    return stackTrace[i];
-                }
-            }
-            throw new NoSuchElementException("unable to locate caller class of " + calleeClass + " in call stack "
-                    + Arrays.toString(stackTrace));
-        }
     }
 }
 
