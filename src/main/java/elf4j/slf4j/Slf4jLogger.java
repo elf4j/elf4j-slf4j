@@ -30,10 +30,10 @@ import elf4j.Logger;
 import elf4j.util.NoopLogger;
 import lombok.NonNull;
 import lombok.ToString;
-import net.jcip.annotations.Immutable;
 import org.slf4j.LoggerFactory;
 import org.slf4j.spi.LoggingEventBuilder;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -188,4 +188,3 @@ class Slf4jLogger implements Logger {
         loggingEventBuilder.log();
     }
 }
-
