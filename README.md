@@ -49,5 +49,5 @@ build of an application, somehow, then the `elf4j.logger.factory.fqcn` system pr
 the desired provider.
 
 ```
-java -Delf4j.logger.factory.fqcn="elf4j.slf4j.Slf4jLoggerFactory" -jar MyApplication.jar
+java -Delf4j.service.provider.fqcn="elf4j.slf4j.Slf4jLoggerFactory" -jar MyApplication.jar
 ```
